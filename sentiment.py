@@ -14,10 +14,10 @@ import unicodedata
 #chcp 65001 for UTF-8
 
 #consumer key, consumer secret, access token, access secret.
-ckey="WLntuQkpDe25sCSpwdLYWidI5"
-csecret="KxbCDrEJqRBs7gjc64bIuJL4dzfvklNtk6UWUN1hviPv0AVble"
-atoken="263661193-2OVxXqpHP6xqRzNymLK9ACh9XbeCtIfz0bp42WCu"
-asecret="WejuT8bdw9U7zLA1RNH2QC2t1rziocwgJBGlkTV47r2qL"
+ckey=""
+csecret=""
+atoken=""
+asecret=""
 fullTweets = []
 cleanTweets = []
 
