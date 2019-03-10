@@ -1,3 +1,4 @@
+from __future__ import division
 from tweepy import Stream
 from tweepy import OAuthHandler
 from tweepy.streaming import StreamListener
@@ -7,15 +8,17 @@ import sys
 import numpy as np
 import re
 import unicodedata
-from __future__ import division
 import numpy as np 
 import re 
 import json
 import unicodedata 
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 analyser = SentimentIntensityAnalyzer()
-import TextBlob
+#import TextBlob
 from collections import defaultdict
+from textblob import TextBlob, Word, Blobber
+from textblob.classifiers import NaiveBayesClassifier
+from textblob.taggers import NLTKTagger
 
 
 #consumer key, consumer secret, access token, access secret.
@@ -25,7 +28,7 @@ atoken=""
 asecret=""
 fullTweets = []
 cleanTweets = []
-
+tweetObject = []
 class listener(StreamListener):
 #obtaining full tweet object, parsing and creating dictionary to sort are per tweet 
  def on_data(self, data):
@@ -51,8 +54,15 @@ class listener(StreamListener):
    if all_data['coordinates'] == True:
     location = all_data['coordinates']
     tweetObject.append({"user_id" : user_id, "new_tweet" : newTweet, "f_count" : f_count, "retweet_count" : retweet_count, "favorite_count" : favorite_count, "location" : location})
+    
    else: 
     tweetObject.append({"user_id" : user_id, "new_tweet" : newTweet, "f_count" : f_count, "retweet_count" : retweet_count, "favorite_count" : favorite_count, "location" : ''})
+    
+   removeUnicode(tweetObject)
+   #simple test
+   for text in tweetObject['new_tweet']:
+    print(text)
+    
 
    return(True)
 
@@ -66,8 +76,8 @@ pos = int()
 neg = int()
 neut = int()
 Chelsea = int()
-cleanTweets = []
-tweetObject = []
+
+
 #list of team names and their alias for searching tweets against
 PremierLeague = {}
 PremierLeague['Arsenal'] = ["Arsenal", "The Gunners", "ARS"]
@@ -135,8 +145,8 @@ def sent(tweetObject):
     pos = int() 
     neg = int()
     neut = int()
-    TeamA = PremierLeague['Chelsea']
-    TeamB = PremierLeague['Liverpool']
+    TeamA = PremierLeague['Arsenal']
+    TeamB = PremierLeague['Manchester United']
     TeamAPos = int()
     TeamBPos = int()
     TeamANeut = int()
@@ -155,36 +165,43 @@ def sent(tweetObject):
                 string_you_are_searching_for = r"\b" + teamNames + r"\b"
                 if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
                     TeamAPos = TeamAPos + 1
-                elif for teamNames in TeamB:
-                          string_you_are_searching_for = r"\b" + teamNames + r"\b"
-                          if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-                              TeamBPos = TeamBPos + 1
-                else:
-                    pos = pos + 1  
+                    
+            if TeamAPos == 0:
+                for teamNames in TeamB:
+                    string_you_are_searching_for = r"\b" + teamNames + r"\b"
+                    if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
+                        TeamBPos = TeamBPos + 1
+            if TeamAPos == 0 and TeamBPos == 0:
+                pos = pos + 1
+
         elif (lb > -0.05) and (lb < 0.05):
             print("Neutral")
             for teamNames in TeamA:
                 string_you_are_searching_for = r"\b" + teamNames + r"\b"
                 if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
                     TeamANeut = TeamANeut + 1
-                elif: for teamNames in TeamB:
-                          string_you_are_searching_for = r"\b" + teamNames + r"\b"
-                          if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-                              TeamBNeut = TeamBNeut + 1
-                else:
-                    neut = neut + 1  
+                    
+            if TeamAPos == 0:
+                for teamNames in TeamB:
+                    string_you_are_searching_for = r"\b" + teamNames + r"\b"
+                    if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
+                        TeamBNuet = TeamBNeut + 1
+            if TeamAPos == 0 and TeamBPos == 0:
+                neut = neut + 1 
         else:
             print("Negitive")
             for teamNames in TeamA:
                 string_you_are_searching_for = r"\b" + teamNames + r"\b"
                 if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
                     TeamANeg = TeamANeg + 1
-                elif: for teamNames in TeamB:
-                          string_you_are_searching_for = r"\b" + teamNames + r"\b"
-                          if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-                              TeamBNeg = TeamBNeg + 1
-                else:
-                    neg = neg + 1   
+                    
+            if TeamAPos == 0:
+                for teamNames in TeamB:
+                    string_you_are_searching_for = r"\b" + teamNames + r"\b"
+                    if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
+                        TeamBNeg = TeamBNeg + 1
+            if TeamAPos == 0 and TeamBPos == 0:
+                neg = neg + 1
     
     print((pos/rate) *100,"% of people tweeted postivly")
     print((neg/rate) *100,"% of people tweeted negitivly")
@@ -244,7 +261,9 @@ def naive(tweetObject):
 auth = OAuthHandler(ckey, csecret)
 auth.set_access_token(atoken, asecret)
 twitterStream = Stream(auth, listener(), tweet_mode= 'extended')
-twitterStream.filter(track=["#MCIvCHE"])
+twitterStream.filter(track=["#ARSMUN"])
+
+
 
 
 
