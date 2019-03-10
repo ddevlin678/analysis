@@ -107,7 +107,7 @@ def removeUnicode(tweetObject):
     #print(new.decode('unicode-escape'))
     text = new.decode('unicode-escape')
     text = new.encode('utf-8')
-    tweetObject['newTweet'.update(tweet)
+    tweetObject['newTweet'].update(tweet)
 
 #accessing the newTweet value in the tweetObject dictionary 
 def cleanTweet(tweetObject):
@@ -116,7 +116,7 @@ def cleanTweet(tweetObject):
         tweet = np.vectorize(remove_pattern)(tweet, "@[\w]*")
         tweet = np.vectorize(remove_pattern)(tweet, "https?://[A-Za-z0-9./]*")
         tweet = np.core.defchararray.replace(tweet, "[^a-zA-Z#]", " ")
-        tweetObject['newTweet'.update(tweet)
+        tweetObject['newTweet'].update(tweet)
     sent(tweetObject)
     #naive(tweetObject)
     #text(tweetObject)
@@ -132,7 +132,7 @@ def sent(tweetObject):
     neg = int()
     neut = int()
     TeamA = PremierLeague['Chelsea']
-    TeamB = PremierLeague['Fulham'])
+    TeamB = PremierLeague['Liverpool']
     TeamAPos = int()
     TeamBPos = int()
     TeamANeut = int()
@@ -151,9 +151,10 @@ def sent(tweetObject):
                 string_you_are_searching_for = r"\b" + teamNames + r"\b"
                 if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
                     TeamAPos = TeamAPos + 1
-                elif: for teamNames in TeamB:
-                    if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-                        TeamBPos = TeamBPos + 1
+                elif for teamNames in TeamB:
+                          string_you_are_searching_for = r"\b" + teamNames + r"\b"
+                          if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
+                              TeamBPos = TeamBPos + 1
                 else:
                     pos = pos + 1  
         elif (lb > -0.05) and (lb < 0.05):
@@ -163,8 +164,9 @@ def sent(tweetObject):
                 if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
                     TeamANeut = TeamANeut + 1
                 elif: for teamNames in TeamB:
-                    if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-                        TeamBNeut = TeamBNeut + 1
+                          string_you_are_searching_for = r"\b" + teamNames + r"\b"
+                          if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
+                              TeamBNeut = TeamBNeut + 1
                 else:
                     neut = neut + 1  
         else:
@@ -174,8 +176,9 @@ def sent(tweetObject):
                 if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
                     TeamANeg = TeamANeg + 1
                 elif: for teamNames in TeamB:
-                    if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-                        TeamBNeg = TeamBNeg + 1
+                          string_you_are_searching_for = r"\b" + teamNames + r"\b"
+                          if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
+                              TeamBNeg = TeamBNeg + 1
                 else:
                     neg = neg + 1   
     
@@ -233,6 +236,7 @@ def naive(tweetObject):
 
     
 #removing unicode characters from tweet text
+
 auth = OAuthHandler(ckey, csecret)
 auth.set_access_token(atoken, asecret)
 twitterStream = Stream(auth, listener(), tweet_mode= 'extended')
