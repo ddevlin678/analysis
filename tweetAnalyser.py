@@ -30,28 +30,32 @@ class listener(StreamListener):
 #obtaining full tweet object, parsing and creating dictionary to sort are per tweet 
  def on_data(self, data):
   try:
-   tweetObject = []
+
    all_data = json.loads(data)
    tweet_text = all_data['text']
    user_id = all_data['id']
+   user = all_data['user']
+   f_count = user['followers_count']
+   retweet_count = all_data['retweet_count']
+   favorite_count = all_data['favorite_count']
+   tweetObject = []
+
    newTweet = tweet_text.encode('utf-8')
+
    if all_data['truncated'] == True:
     extended_tweet = all_data['extended_tweet']
     tweet_text = extended_tweet['full_text']
     newTweet = tweet_text.encode('utf-8', ignore)
-   user = all_data['user']
-   print(user['verified'])
-   f_count = user['followers_count']
-   retweet_count = all_data['retweet_count']
-   favorite_count = all_data['favorite_count']
+   
+
    if all_data['coordinates'] == True:
     location = all_data['coordinates']
-    print(location)
     tweetObject.append({"user_id" : user_id, "new_tweet" : newTweet, "f_count" : f_count, "retweet_count" : retweet_count, "favorite_count" : favorite_count, "location" : location})
    else: 
     tweetObject.append({"user_id" : user_id, "new_tweet" : newTweet, "f_count" : f_count, "retweet_count" : retweet_count, "favorite_count" : favorite_count, "location" : ''})
-   print(tweetObject)
+
    return(True)
+
   except:
    print(sys.exc_info()[0])
  
@@ -241,3 +245,6 @@ auth = OAuthHandler(ckey, csecret)
 auth.set_access_token(atoken, asecret)
 twitterStream = Stream(auth, listener(), tweet_mode= 'extended')
 twitterStream.filter(track=["#MCIvCHE"])
+
+
+
