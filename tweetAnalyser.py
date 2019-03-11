@@ -126,18 +126,19 @@ class listener(StreamListener):
   tweetCount = tweetCount + 1 
  
   #try:
-  print((pos + TeamAPos + TeamBPos /tweetCount) *100,"% of people tweeted postivly")
-  print((neg + TeamANeg + TeamBNeg/tweetCount) *100,"% of people tweeted negitivly")
-  print((neut + TeamANeut + TeamBNeut/tweetCount) *100,"% of people tweeted Neutral")
+  print(((pos + TeamAPos + TeamBPos) /(tweetCount)) *100,"% of people tweeted postivly")
+  print(((neg + TeamANeg + TeamBNeg)/(tweetCount)) *100,"% of people tweeted negitivly")
+  print(((neut + TeamANeut + TeamBNeut)/(tweetCount)) *100,"% of people tweeted Neutral")
   print("out of ",tweetCount)
   #total = (pos - neg / pos + neg + neut)
   totalACount = (TeamAPos + TeamANeut + TeamANeg)
   totalBCount = (TeamBPos + TeamBNeut + TeamBNeg)
-
-  totalA = (TeamAPos - TeamANeg / TeamAPos + TeamANeg + TeamANeut)
-  totalB = (TeamBPos - TeamBNeg / TeamBPos + TeamBNeg + TeamBNeut)
+  totalA = ((TeamAPos - TeamANeg) / (TeamAPos + TeamANeg + TeamANeut))
+  totalB = ((TeamBPos - TeamBNeg) / (TeamBPos + TeamBNeg + TeamBNeut))
   print( TeamA[0] ,"tweets: Positive",TeamAPos,"Neutral",TeamANeut,"Negitive",TeamANeg)
   print( TeamB[0] ,"tweets: Positive",TeamBPos,"Neutral",TeamBNeut,"Negitive",TeamBNeg)
+  print(totalA)
+  print(totalB)
   
   traceback.print_exc()
 
@@ -234,5 +235,6 @@ auth = OAuthHandler(ckey, csecret)
 auth.set_access_token(atoken, asecret)
 twitterStream = Stream(auth, listener(), tweet_mode= 'extended')
 twitterStream.filter(track=["#ARSMUN"])
+
 
 
