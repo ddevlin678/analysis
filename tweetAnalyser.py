@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 import nltk
 import random
 from nltk.corpus import movie_reviews
-
+import traceback
 #consumer key, consumer secret, access token, access secret.
 ckey=""
 csecret=""
@@ -125,25 +125,21 @@ class listener(StreamListener):
   global tweetCount 
   tweetCount = tweetCount + 1 
  
-  try:
-   print((pos/tweetCount) *100,"% of people tweeted postivly")
-   print((neg/tweetCount) *100,"% of people tweeted negitivly")
-   print((neut/tweetCount) *100,"% of people tweeted Neutral")
-   print("out of ",tweetCount)
-   total = (pos - neg / pos + neg + neut)
-   totalA = (TeamApos - TeamAneg / TeamApos + TeamAneg + TeamAneut)
-   totalB = (TeamBpos - TeamBneg / TeamBpos + TeamBneg + TeamBneut)
-   print( TeamA[0] ,"tweets: Positive",TeamAPos,"Neutral",TeamANeut,"Negitive",TeamANeg)
-   print( TeamB[0] ,"tweets: Positive",TeamBPos,"Neutral",TeamBNeut,"Negitive",TeamBNeg)
- 
-  except ZeroDivisionError:
-   print("eg")
-   total = float('Inf')
-   totalA = float('Inf')
-   totalB = float('Inf')
-   print( TeamA[1] ,"tweets: Positive",TeamAPos,"Neutral",TeamANeut,"Negitive",TeamANeg)
-   print( TeamB[1] ,"tweets: Positive",TeamBPos,"Neutral",TeamBNeut,"Negitive",TeamBNeg)
-    
+  #try:
+  print((pos + TeamAPos + TeamBPos /tweetCount) *100,"% of people tweeted postivly")
+  print((neg + TeamANeg + TeamBNeg/tweetCount) *100,"% of people tweeted negitivly")
+  print((neut + TeamANeut + TeamBNeut/tweetCount) *100,"% of people tweeted Neutral")
+  print("out of ",tweetCount)
+  #total = (pos - neg / pos + neg + neut)
+  totalACount = (TeamAPos + TeamANeut + TeamANeg)
+  totalBCount = (TeamBPos + TeamBNeut + TeamBNeg)
+
+  totalA = (TeamAPos - TeamANeg / TeamAPos + TeamANeg + TeamANeut)
+  totalB = (TeamBPos - TeamBNeg / TeamBPos + TeamBNeg + TeamBNeut)
+  print( TeamA[0] ,"tweets: Positive",TeamAPos,"Neutral",TeamANeut,"Negitive",TeamANeg)
+  print( TeamB[0] ,"tweets: Positive",TeamBPos,"Neutral",TeamBNeut,"Negitive",TeamBNeg)
+  
+  traceback.print_exc()
 
  def on_data(self, data):
   #try:
@@ -238,10 +234,5 @@ auth = OAuthHandler(ckey, csecret)
 auth.set_access_token(atoken, asecret)
 twitterStream = Stream(auth, listener(), tweet_mode= 'extended')
 twitterStream.filter(track=["#ARSMUN"])
-
-
-
-
-
 
 
