@@ -19,16 +19,19 @@ from collections import defaultdict
 from textblob import TextBlob, Word, Blobber
 from textblob.classifiers import NaiveBayesClassifier
 from textblob.taggers import NLTKTagger
+import threading
+import matplotlib.pyplot as plt
 
 
 #consumer key, consumer secret, access token, access secret.
-ckey=""
-csecret=""
-atoken=""
-asecret=""
+ckey="WLntuQkpDe25sCSpwdLYWidI5"
+csecret="KxbCDrEJqRBs7gjc64bIuJL4dzfvklNtk6UWUN1hviPv0AVble"
+atoken="263661193-2OVxXqpHP6xqRzNymLK9ACh9XbeCtIfz0bp42WCu"
+asecret="WejuT8bdw9U7zLA1RNH2QC2t1rziocwgJBGlkTV47r2qL"
 fullTweets = []
 cleanTweets = []
-tweetObject = []
+#tweetObject = []
+
 class listener(StreamListener):
 #obtaining full tweet object, parsing and creating dictionary to sort are per tweet 
  def on_data(self, data):
@@ -41,30 +44,32 @@ class listener(StreamListener):
    f_count = user['followers_count']
    retweet_count = all_data['retweet_count']
    favorite_count = all_data['favorite_count']
-   tweetObject = []
 
-   newTweet = tweet_text.encode('utf-8')
+   newTweet = (tweet_text.encode('ascii', 'ignore')).decode("utf-8")
 
    if all_data['truncated'] == True:
     extended_tweet = all_data['extended_tweet']
     tweet_text = extended_tweet['full_text']
-    newTweet = tweet_text.encode('utf-8', ignore)
+    #newTweet = tweet_text.encode('utf-8')
+    newTweet = (tweet_text.encode('ascii', 'ignore')).decode("utf-8")
    
 
    if all_data['coordinates'] == True:
     location = all_data['coordinates']
-    tweetObject.append({"user_id" : user_id, "new_tweet" : newTweet, "f_count" : f_count, "retweet_count" : retweet_count, "favorite_count" : favorite_count, "location" : location})
+    tweetObject = {"user_id" : user_id, "new_tweet" : newTweet, "f_count" : f_count, "retweet_count" : retweet_count, "favorite_count" : favorite_count, "location" : location}
     
    else: 
-    tweetObject.append({"user_id" : user_id, "new_tweet" : newTweet, "f_count" : f_count, "retweet_count" : retweet_count, "favorite_count" : favorite_count, "location" : ''})
-    
-   removeUnicode(tweetObject)
-   #simple test
-   for text in tweetObject['new_tweet']:
-    print(text)
+    tweetObject = {"user_id" : user_id, "new_tweet" : newTweet, "f_count" : f_count, "retweet_count" : retweet_count, "favorite_count" : favorite_count, "location" : ''}
+   
+   cleanTweet(tweetObject)
+
+   #threading.Timer(60.0, cleanTweet(tweetObject)).start()
+   #print(tweetObject.keys())
+   
+   #print(tweetObject['new_tweet'])
     
 
-   return(True)
+   #return(True)
 
   except:
    print(sys.exc_info()[0])
@@ -101,6 +106,7 @@ PremierLeague['Tottenham Hotspur'] = ["Tottenham Hotspur", "Tottenham", "The Spu
 PremierLeague['Watford'] = ["Watford", "Hornets", "Yellow Army", "WFC"]
 PremierLeague['West Bromwich Albion'] = ["West Bromwich" "Albion", "West Bromwich", "The Baggies", "WBA"]
 PremierLeague['West Ham United'] = ["West Ham United", "West Ham",  "The Hammers", "WHU"]
+print(PremierLeague['Arsenal'])
 
 
 import nltk
@@ -109,159 +115,147 @@ from nltk.corpus import movie_reviews
 
 #remove function used inside cleanTweets
 def remove_pattern(tweet_text, pattern):
-   r = re.findall(pattern, tweet_text)
-   for i in r:
-       tweet_text = re.sub(i, '', tweet_text)   
-   return tweet_text     
+ r = re.findall(pattern, tweet_text)
+ for i in r:
+  tweet_text = re.sub(i, '', tweet_text)   
+ return tweet_text     
 
-#removing any unicode characters 
-def removeUnicode(tweetObject):
-  for text in tweetObject[newTweet]:
-    text = line.encode('utf-8')
-    #print(new.decode('unicode-escape'))
-    text = new.decode('unicode-escape')
-    text = new.encode('utf-8')
-    tweetObject['newTweet'].update(tweet)
 
 #accessing the newTweet value in the tweetObject dictionary 
 def cleanTweet(tweetObject):
-    for tweet in tweetObject['newTweet']:
-        tweet = np.vectorize(remove_pattern)(tweet, "RT @[\w]*:")
-        tweet = np.vectorize(remove_pattern)(tweet, "@[\w]*")
-        tweet = np.vectorize(remove_pattern)(tweet, "https?://[A-Za-z0-9./]*")
-        tweet = np.core.defchararray.replace(tweet, "[^a-zA-Z#]", " ")
-        tweetObject['newTweet'].update(tweet)
-    sent(tweetObject)
+ for tweet in tweetObject:
+  print(tweetObject['new_tweet'])
+  tweet = str(tweetObject['new_tweet'])
+  tweet = np.vectorize(remove_pattern)(tweet, "RT @[\w]*:")
+  tweet = np.vectorize(remove_pattern)(tweet, "@[\w]*")
+  tweet = np.vectorize(remove_pattern)(tweet, "https?://[A-Za-z0-9./]*")
+  tweet = np.core.defchararray.replace(tweet, "[^a-zA-Z#]", " ")
+  tweetObject['new_tweet'] = tweet
+ #sent(tweetObject)
+ #eventTime(tweetObject)
     #naive(tweetObject)
     #text(tweetObject)
 
 #not called 
 def text(tweetObject):
-    analysis = TextBlob(tweetObject)
-    print(analysis.sentiment) 
+ analysis = TextBlob(tweetObject)
+ print(analysis.sentiment) 
 #giving a sentiment value to each tweet text
 def sent(tweetObject):
-    rate = (len(tweetObject))
-    pos = int() 
-    neg = int()
-    neut = int()
-    TeamA = PremierLeague['Arsenal']
-    TeamB = PremierLeague['Manchester United']
-    TeamAPos = int()
-    TeamBPos = int()
-    TeamANeut = int()
-    TeamBNeut = int()
-    TeamANeg = int()
-    TeamBNeg = int()
-    for tweet in tweetObject['newTweet']:
-        tweet = ''.join(str(tweet))
+ rate = (len(tweetObject))
+ pos = int() 
+ neg = int()
+ neut = int()
+ TeamA = PremierLeague['Arsenal']
+ TeamB = PremierLeague['Manchester United']
+ TeamAPos = int()
+ TeamBPos = int()
+ TeamANeut = int()
+ TeamBNeut = int()
+ TeamANeg = int()
+ TeamBNeg = int()
+ for tweet in tweetObject:
+  tweet = tweetObject['new_tweet']
+  tweet = ''.join(str(tweet))
         #text(item)
         #naive(item)
-        score = analyser.polarity_scores(tweet)
-        lb = score['compound']
-        if lb >= 0.05:
-            print("Positive")
-            for teamNames in TeamA:
-                string_you_are_searching_for = r"\b" + teamNames + r"\b"
-                if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-                    TeamAPos = TeamAPos + 1
-                    
-            if TeamAPos == 0:
-                for teamNames in TeamB:
-                    string_you_are_searching_for = r"\b" + teamNames + r"\b"
-                    if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-                        TeamBPos = TeamBPos + 1
-            if TeamAPos == 0 and TeamBPos == 0:
-                pos = pos + 1
+  score = analyser.polarity_scores(tweet)
+  lb = score['compound']
+  if lb >= 0.05:
+   print("Positive")
+   for teamNames in TeamA:
+    string_you_are_searching_for = r"\b" + teamNames + r"\b"
+    if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
+     TeamAPos = TeamAPos + 1
+                
+    if TeamAPos == 0:
+     for teamNames in TeamB:
+       string_you_are_searching_for = r"\b" + teamNames + r"\b"
+       if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
+        TeamBPos = TeamBPos + 1
+        if TeamAPos == 0 and TeamBPos == 0:
+         pos = pos + 1
 
-        elif (lb > -0.05) and (lb < 0.05):
-            print("Neutral")
-            for teamNames in TeamA:
-                string_you_are_searching_for = r"\b" + teamNames + r"\b"
-                if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-                    TeamANeut = TeamANeut + 1
-                    
-            if TeamAPos == 0:
-                for teamNames in TeamB:
-                    string_you_are_searching_for = r"\b" + teamNames + r"\b"
-                    if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-                        TeamBNuet = TeamBNeut + 1
-            if TeamAPos == 0 and TeamBPos == 0:
-                neut = neut + 1 
-        else:
-            print("Negitive")
-            for teamNames in TeamA:
-                string_you_are_searching_for = r"\b" + teamNames + r"\b"
-                if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-                    TeamANeg = TeamANeg + 1
-                    
-            if TeamAPos == 0:
-                for teamNames in TeamB:
-                    string_you_are_searching_for = r"\b" + teamNames + r"\b"
-                    if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-                        TeamBNeg = TeamBNeg + 1
-            if TeamAPos == 0 and TeamBPos == 0:
-                neg = neg + 1
+  elif (lb > -0.05) and (lb < 0.05):
+   print("Neutral")
+   for teamNames in TeamA:
+    string_you_are_searching_for = r"\b" + teamNames + r"\b"
+    if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
+     TeamANeut = TeamANeut + 1
+                
+   if TeamANeut == 0:
+    for teamNames in TeamB:
+     string_you_are_searching_for = r"\b" + teamNames + r"\b"
+     if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
+      TeamBNuet = TeamBNeut + 1
+      if TeamANeut == 0 and TeamBNeut == 0:
+       neut = neut + 1 
+    else:
+     print("Negitive")
+     for teamNames in TeamA:
+      string_you_are_searching_for = r"\b" + teamNames + r"\b"
+      if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
+       TeamANeg = TeamANeg + 1
+                
+     if TeamANeg == 0:
+      for teamNames in TeamB:
+       string_you_are_searching_for = r"\b" + teamNames + r"\b"
+       if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
+        TeamBNeg = TeamBNeg + 1
+        if TeamANeg == 0 and TeamBNeg == 0:
+         neg = neg + 1
     
-    print((pos/rate) *100,"% of people tweeted postivly")
-    print((neg/rate) *100,"% of people tweeted negitivly")
-    print((neut/rate) *100,"% of people tweeted Neutral")
-    print("out of ",rate)
-    print( teamA ,"tweets: Positive",TeamAPos,"Neutral",TeamAPNeut,"Negitive",TeamANeg)
-    print( teamB ,"tweets: Positive",TeamBPos,"Neutral",TeamBPNeut,"Negitive",TeamBNeg)
+ print((pos/rate) *100,"% of people tweeted postivly")
+ print((neg/rate) *100,"% of people tweeted negitivly")
+ print((neut/rate) *100,"% of people tweeted Neutral")
+ print("out of ",rate)
+ total = (pos - neg / pos + neg + neut)
+ totalA = (TeamApos - TeamAneg / TeamApos + TeamAneg + TeamAneut)
+ totalB = (TeamBpos - TeamBneg / TeamBpos + TeamBneg + TeamBneut)
+ print( TeamA[1] ,"tweets: Positive",TeamAPos,"Neutral",TeamANeut,"Negitive",TeamANeg)
+ print( TeamB[1] ,"tweets: Positive",TeamBPos,"Neutral",TeamBNeut,"Negitive",TeamBNeg)
 
+def plotting():
+ plt.plot([totalA,totalB])
+ plt.ylabel('Level of Sentiment')
+ plt.xlabel('Minutes in the game')
+ plt.show()
+ 
+def eventTime(tweetObject):
+ events = {}
+ incEvents = {}
+ incEvents['goal'] = [int()]
+ incEvents['redCard'] = [int()]
+ incEvents['penalty'] = [int()]
+ incEvents['substitution'] = [int()]
+ incEvents['injury'] = [int()]
+ incEvents['freeKick'] = [int()]
+ incEvents['offside'] = [int()]
+ incEvents['assist'] = [int()]
+ incEvents['yellowcard'] = [int()]
 
-#not called 
-def naive(tweetObject):
-    documents = [(list(movie_reviews.words(fileid)), category)
-                 for category in movie_reviews.categories()
-                 for fileid in movie_reviews.fileids(category)]
+ events['goal'] = ["goal", "score", "point", "shot", "strike", "kick", "on target"]
+ events['redCard'] = ["red card", "sent off", "foul", "sending off", "straight red"]
+ events['penalty'] = ["penalty", "pen"]
+ events['substitution'] = ["substitution", "sub", "injury", "subbed", "bench"]
+ events['injury'] = ["injured", "injury"]
+ events['freeKick'] = ["free-kick", "sub", "injury", "subbed", "bench"]
+ events['offside'] = ["offside"]
+ events['assist'] = ["assist", "pass", "knocked on"]
+ events['yellowcard'] = ["yellow", "foul", "warning", "caution"]
 
-    random.shuffle(documents)
-    
-    testing_set = tweetObject
-    #print(documents[1])
+ for event in events:
+  tweet = tweetObject['new_tweet']
+  if re.search(event, tweet, re.IGNORECASE):
+   incEvents['event'] = +1 
 
-    all_words = []
-    for w in movie_reviews.words():
-        all_words.append(w.lower())
-
-    all_words = nltk.FreqDist(all_words)
-    #print(all_words.most_common(15))
-
-
-    word_features = list(all_words.keys())[:3000]
-
-    def find_features(document):
-        words = set(document)
-        features = {}
-        for w in word_features:
-            features[w] = (w in words)
-            
-
-        return features
-
-    featuresets = [(find_features(rev), category) for (rev, category) in documents]
-     
-    training_set = featuresets[:1900]
-
-    # set that we'll test against.
-    testing_set = tweetObject
-    
-    print(type(testing_set))
-    print(testing_set)
-
-    classifier = nltk.NaiveBayesClassifier.train(training_set)
-
-    print("Classifier accuracy percent:",(nltk.classify.accuracy(classifier, testing_set))*100)
-
-    
-#removing unicode characters from tweet text
-
+    #if count in incEvents if it is exceeded average by 400%
+          
 auth = OAuthHandler(ckey, csecret)
 auth.set_access_token(atoken, asecret)
 twitterStream = Stream(auth, listener(), tweet_mode= 'extended')
 twitterStream.filter(track=["#ARSMUN"])
+
 
 
 
