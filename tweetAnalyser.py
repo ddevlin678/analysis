@@ -62,59 +62,6 @@ PremierLeague['West Ham United'] = ["West Ham United", "West Ham",  "The Hammers
 
 class listener(StreamListener):
 #obtaining full tweet object, parsing and creating dictionary to sort are per tweet 
- def on_data(self, data):
-  try:
-
-   all_data = json.loads(data)
-   tweet_text = all_data['text']
-   user_id = all_data['id']
-   user = all_data['user']
-   f_count = user['followers_count']
-   retweet_count = all_data['retweet_count']
-   favorite_count = all_data['favorite_count']
-
-   newTweet = (tweet_text.encode('ascii', 'ignore')).decode("utf-8")
-   newTweet = re.sub('RT @[\w]*:',  '',    newTweet)
-   newTweet = re.sub('@[\w]*',  '',    newTweet)
-   newTweet = re.sub('https?://[A-Za-z0-9./]*',  '',    newTweet)
-
-
-   if all_data['truncated'] == True:
-    extended_tweet = all_data['extended_tweet']
-    tweet_text = extended_tweet['full_text']
-    #newTweet = tweet_text.encode('utf-8')
-    newTweet = (tweet_text.encode('ascii', 'ignore')).decode("utf-8")
-    newTweet = re.sub('RT @[\w]*:',  '',    newTweet)
-    newTweet = re.sub('@[\w]*',  '',    newTweet)
-    newTweet = re.sub('https?://[A-Za-z0-9./]*',  '',    newTweet)
-       
-
-   if all_data['coordinates'] == True:
-    location = all_data['coordinates']
-    tweetObject = {"user_id" : user_id, "new_tweet" : newTweet, "f_count" : f_count, "retweet_count" : retweet_count, "favorite_count" : favorite_count, "location" : location}
-    
-   else: 
-    tweetObject = {"user_id" : user_id, "new_tweet" : newTweet, "f_count" : f_count, "retweet_count" : retweet_count, "favorite_count" : favorite_count, "location" : ''}
-
-   print("hello")
-
-   sent(tweetObject)
-
-   #threading.Timer(60.0, cleanTweet(tweetObject)).start()
-   #print(tweetObject.keys())
-
-   #return(True)
-
-  except:
-   print(sys.exc_info()[0])
- 
- def on_error(self, status):
-  print(status)
-
- def text(tweetObject):
-  analysis = TextBlob(tweetObject)
-  print(analysis.sentiment) 
-
  def sent(tweetObject):
   print("HELLO")
   pos = int() 
@@ -196,6 +143,61 @@ class listener(StreamListener):
    print( TeamA[1] ,"tweets: Positive",TeamAPos,"Neutral",TeamANeut,"Negitive",TeamANeg)
    print( TeamB[1] ,"tweets: Positive",TeamBPos,"Neutral",TeamBNeut,"Negitive",TeamBNeg)
     
+
+ def on_data(self, data):
+  #try:
+
+  all_data = json.loads(data)
+  tweet_text = all_data['text']
+  user_id = all_data['id']
+  user = all_data['user']
+  f_count = user['followers_count']
+  retweet_count = all_data['retweet_count']
+  favorite_count = all_data['favorite_count']
+
+  newTweet = (tweet_text.encode('ascii', 'ignore')).decode("utf-8")
+  newTweet = re.sub('RT @[\w]*:',  '',    newTweet)
+  newTweet = re.sub('@[\w]*',  '',    newTweet)
+  newTweet = re.sub('https?://[A-Za-z0-9./]*',  '',    newTweet)
+
+
+  if all_data['truncated'] == True:
+   extended_tweet = all_data['extended_tweet']
+   tweet_text = extended_tweet['full_text']
+    #newTweet = tweet_text.encode('utf-8')
+   newTweet = (tweet_text.encode('ascii', 'ignore')).decode("utf-8")
+   newTweet = re.sub('RT @[\w]*:',  '',    newTweet)
+   newTweet = re.sub('@[\w]*',  '',    newTweet)
+   newTweet = re.sub('https?://[A-Za-z0-9./]*',  '',    newTweet)
+       
+
+  if all_data['coordinates'] == True:
+   location = all_data['coordinates']
+   tweetObject = {"user_id" : user_id, "new_tweet" : newTweet, "f_count" : f_count, "retweet_count" : retweet_count, "favorite_count" : favorite_count, "location" : location}
+
+  else: 
+   tweetObject = {"user_id" : user_id, "new_tweet" : newTweet, "f_count" : f_count, "retweet_count" : retweet_count, "favorite_count" : favorite_count, "location" : ''}
+    
+  print("hello")
+  sent(tweetObject)
+    
+
+   #threading.Timer(60.0, cleanTweet(tweetObject)).start()
+   #print(tweetObject.keys())
+
+   #return(True)
+
+  #except:
+   #print(sys.exc_info()[0])
+ 
+ def on_error(self, status):
+  print(status)
+
+ def text(tweetObject):
+  analysis = TextBlob(tweetObject)
+  print(analysis.sentiment) 
+
+ 
  def plotting():
   plt.plot([totalA,totalB])
   plt.ylabel('Level of Sentiment')
