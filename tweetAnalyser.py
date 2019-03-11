@@ -21,6 +21,9 @@ from textblob.classifiers import NaiveBayesClassifier
 from textblob.taggers import NLTKTagger
 import threading
 import matplotlib.pyplot as plt
+import nltk
+import random
+from nltk.corpus import movie_reviews
 
 
 #consumer key, consumer secret, access token, access secret.
@@ -30,77 +33,8 @@ atoken=""
 asecret=""
 fullTweets = []
 cleanTweets = []
+tweetCount = 0
 
-#tweetObject = []
-
-class listener(StreamListener):
-#obtaining full tweet object, parsing and creating dictionary to sort are per tweet 
- def on_data(self, data):
-  try:
-
-   all_data = json.loads(data)
-   tweet_text = all_data['text']
-   user_id = all_data['id']
-   user = all_data['user']
-   f_count = user['followers_count']
-   retweet_count = all_data['retweet_count']
-   favorite_count = all_data['favorite_count']
-
-   newTweet = (tweet_text.encode('ascii', 'ignore')).decode("utf-8")
-   newTweet = re.sub('RT @[\w]*:',  '',    newTweet)
-   newTweet = re.sub('@[\w]*',  '',    newTweet)
-   newTweet = re.sub('https?://[A-Za-z0-9./]*',  '',    newTweet)
-
-   
-   #print(newTweet)
-   #newTweet = np.vectorize(remove_pattern)(newTweet, "RT @[\w]*:")
-   #newTweet = np.vectorize(remove_pattern)(newTweet, "@[\w]*")
-   #newTweet = np.vectorize(remove_pattern)(newTweet, "https?://[A-Za-z0-9./]*")
-   #newTweet = np.core.defchararray.replace(newTweet, "[^a-zA-Z#]", " ")
-
-   if all_data['truncated'] == True:
-    extended_tweet = all_data['extended_tweet']
-    tweet_text = extended_tweet['full_text']
-    #newTweet = tweet_text.encode('utf-8')
-    newTweet = (tweet_text.encode('ascii', 'ignore')).decode("utf-8")
-    newTweet = re.sub('RT @[\w]*:',  '',    newTweet)
-    newTweet = re.sub('@[\w]*',  '',    newTweet)
-    newTweet = re.sub('https?://[A-Za-z0-9./]*',  '',    newTweet)
-    #newTweet = np.core.defchararray.replace(newTweet, "[^a-zA-Z#]", " ")
-       
-
-   if all_data['coordinates'] == True:
-    location = all_data['coordinates']
-    tweetObject = {"user_id" : user_id, "new_tweet" : newTweet, "f_count" : f_count, "retweet_count" : retweet_count, "favorite_count" : favorite_count, "location" : location}
-    
-   else: 
-    tweetObject = {"user_id" : user_id, "new_tweet" : newTweet, "f_count" : f_count, "retweet_count" : retweet_count, "favorite_count" : favorite_count, "location" : ''}
-
-   #print(tweetObject['new_tweet'])
-
-   sent(tweetObject)
-
-   #threading.Timer(60.0, cleanTweet(tweetObject)).start()
-   #print(tweetObject.keys())
-   
-   
-    
-
-   #return(True)
-
-  except:
-   print(sys.exc_info()[0])
- 
- def on_error(self, status):
-  print(status)
-
-pos = int() 
-neg = int()
-neut = int()
-Chelsea = int()
-
-
-#list of team names and their alias for searching tweets against
 PremierLeague = {}
 PremierLeague['Arsenal'] = ["Arsenal", "The Gunners", "ARS"]
 PremierLeague['Aston Villa'] = [ "Aston Villa", "The Villains", "Villa", "AST"]
@@ -126,159 +60,175 @@ PremierLeague['West Ham United'] = ["West Ham United", "West Ham",  "The Hammers
 
 
 
-import nltk
-import random
-from nltk.corpus import movie_reviews
+class listener(StreamListener):
+#obtaining full tweet object, parsing and creating dictionary to sort are per tweet 
+ def on_data(self, data):
+  try:
 
-#remove function used inside cleanTweets
-def remove_pattern(tweet_text, pattern):
- r = re.findall(pattern, tweet_text)
- for i in r:
-  tweet_text = re.sub(i, '', tweet_text)   
- return tweet_text     
+   all_data = json.loads(data)
+   tweet_text = all_data['text']
+   user_id = all_data['id']
+   user = all_data['user']
+   f_count = user['followers_count']
+   retweet_count = all_data['retweet_count']
+   favorite_count = all_data['favorite_count']
+
+   newTweet = (tweet_text.encode('ascii', 'ignore')).decode("utf-8")
+   newTweet = re.sub('RT @[\w]*:',  '',    newTweet)
+   newTweet = re.sub('@[\w]*',  '',    newTweet)
+   newTweet = re.sub('https?://[A-Za-z0-9./]*',  '',    newTweet)
 
 
-#accessing the newTweet value in the tweetObject dictionary 
-def cleanTweet(tweetObject):
- print(tweet) # prints keys with no values
- print(tweet['new_tweet']) #prints class 'TypeError' 
- tweet = str(tweetObject['new_tweet'])
- tweet = np.vectorize(remove_pattern)(tweet, "RT @[\w]*:")
- tweet = np.vectorize(remove_pattern)(tweet, "@[\w]*")
- tweet = np.vectorize(remove_pattern)(tweet, "https?://[A-Za-z0-9./]*")
- tweet = np.core.defchararray.replace(tweet, "[^a-zA-Z#]", " ")
- tweetObject['new_tweet'] = tweet
- #sent(tweetObject)
- #eventTime(tweetObject)
-    #naive(tweetObject)
-    #text(tweetObject)
+   if all_data['truncated'] == True:
+    extended_tweet = all_data['extended_tweet']
+    tweet_text = extended_tweet['full_text']
+    #newTweet = tweet_text.encode('utf-8')
+    newTweet = (tweet_text.encode('ascii', 'ignore')).decode("utf-8")
+    newTweet = re.sub('RT @[\w]*:',  '',    newTweet)
+    newTweet = re.sub('@[\w]*',  '',    newTweet)
+    newTweet = re.sub('https?://[A-Za-z0-9./]*',  '',    newTweet)
+       
 
-#not called 
-def text(tweetObject):
- analysis = TextBlob(tweetObject)
- print(analysis.sentiment) 
-#giving a sentiment value to each tweet text
-def sent(tweetObject):
+   if all_data['coordinates'] == True:
+    location = all_data['coordinates']
+    tweetObject = {"user_id" : user_id, "new_tweet" : newTweet, "f_count" : f_count, "retweet_count" : retweet_count, "favorite_count" : favorite_count, "location" : location}
+    
+   else: 
+    tweetObject = {"user_id" : user_id, "new_tweet" : newTweet, "f_count" : f_count, "retweet_count" : retweet_count, "favorite_count" : favorite_count, "location" : ''}
+
+   print("hello")
+
+   sent(tweetObject)
+
+   #threading.Timer(60.0, cleanTweet(tweetObject)).start()
+   #print(tweetObject.keys())
+
+   #return(True)
+
+  except:
+   print(sys.exc_info()[0])
  
- print("HELLO")
- rate = (len(tweetObject))
- pos = int() 
- neg = int()
- neut = int()
- TeamA = PremierLeague['Arsenal']
- TeamB = PremierLeague['Manchester United']
- TeamAPos = int()
- TeamBPos = int()
- TeamANeut = int()
- TeamBNeut = int()
- TeamANeg = int()
- TeamBNeg = int()
- #for tweet in tweetObject:
- tweet = tweetObject['new_tweet']
- print(tweet)
- tweet = ''.join(str(tweet))
-      #text(item)
-      #naive(item)
- score = analyser.polarity_scores(tweet)
- lb = score['compound']
- if lb >= 0.05:
-  print("Positive")
-  for teamNames in TeamA:
-   string_you_are_searching_for = r"\b" + teamNames + r"\b"
-   if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-    TeamAPos = TeamAPos + 1
-              
-   if TeamAPos == 0:
-    for teamNames in TeamB:
-      string_you_are_searching_for = r"\b" + teamNames + r"\b"
-      if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-       TeamBPos = TeamBPos + 1
-       if TeamAPos == 0 and TeamBPos == 0:
-        pos = pos + 1
+ def on_error(self, status):
+  print(status)
 
- elif (lb > -0.05) and (lb < 0.05):
-  print("Neutral")
-  for teamNames in TeamA:
-   string_you_are_searching_for = r"\b" + teamNames + r"\b"
-   if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-    TeamANeut = TeamANeut + 1
-              
-  if TeamANeut == 0:
-   for teamNames in TeamB:
+ def text(tweetObject):
+  analysis = TextBlob(tweetObject)
+  print(analysis.sentiment) 
+
+ def sent(tweetObject):
+  print("HELLO")
+  pos = int() 
+  neg = int()
+  neut = int()
+  TeamA = PremierLeague['Arsenal']
+  TeamB = PremierLeague['Manchester United']
+  TeamAPos = int()
+  TeamBPos = int()
+  TeamANeut = int()
+  TeamBNeut = int()
+  TeamANeg = int()
+  TeamBNeg = int()
+  tweet = tweetObject['new_tweet']
+  tweet = ''.join(str(tweet))
+
+  score = analyser.polarity_scores(tweet)
+  lb = score['compound']
+  if lb >= 0.05:
+   print("Positive")
+   for teamNames in TeamA:
     string_you_are_searching_for = r"\b" + teamNames + r"\b"
     if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-     TeamBNuet = TeamBNeut + 1
-     if TeamANeut == 0 and TeamBNeut == 0:
-      neut = neut + 1 
-   else:
-    print("Negitive")
-    for teamNames in TeamA:
+     TeamAPos = TeamAPos + 1
+              
+    if TeamAPos == 0:
+     for teamNames in TeamB:
+       string_you_are_searching_for = r"\b" + teamNames + r"\b"
+       if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
+        TeamBPos = TeamBPos + 1
+        if TeamAPos == 0 and TeamBPos == 0:
+         pos = pos + 1
+
+  elif (lb > -0.05) and (lb < 0.05):
+   print("Neutral")
+   for teamNames in TeamA:
+    string_you_are_searching_for = r"\b" + teamNames + r"\b"
+    if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
+     TeamANeut = TeamANeut + 1
+              
+   if TeamANeut == 0:
+    for teamNames in TeamB:
      string_you_are_searching_for = r"\b" + teamNames + r"\b"
      if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-      TeamANeg = TeamANeg + 1
-              
-    if TeamANeg == 0:
-     for teamNames in TeamB:
+      TeamBNuet = TeamBNeut + 1
+      if TeamANeut == 0 and TeamBNeut == 0:
+       neut = neut + 1 
+    else:
+     print("Negitive")
+     for teamNames in TeamA:
       string_you_are_searching_for = r"\b" + teamNames + r"\b"
       if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-       TeamBNeg = TeamBNeg + 1
-       if TeamANeg == 0 and TeamBNeg == 0:
-        neg = neg + 1
- print("GE")
- tweetCount = tweetCount + 1 
+       TeamANeg = TeamANeg + 1
+              
+     if TeamANeg == 0:
+      for teamNames in TeamB:
+       string_you_are_searching_for = r"\b" + teamNames + r"\b"
+       if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
+        TeamBNeg = TeamBNeg + 1
+        if TeamANeg == 0 and TeamBNeg == 0:
+         neg = neg + 1
+  tweetCount = tweetCount + 1 
  
- try:
+  try:
+   print((pos/tweetCount) *100,"% of people tweeted postivly")
+   print((neg/tweetCount) *100,"% of people tweeted negitivly")
+   print((neut/tweetCount) *100,"% of people tweeted Neutral")
+   print("out of ",tweetCount)
+   total = (pos - neg / pos + neg + neut)
+   totalA = (TeamApos - TeamAneg / TeamApos + TeamAneg + TeamAneut)
+   totalB = (TeamBpos - TeamBneg / TeamBpos + TeamBneg + TeamBneut)
+   print( TeamA[1] ,"tweets: Positive",TeamAPos,"Neutral",TeamANeut,"Negitive",TeamANeg)
+   print( TeamB[1] ,"tweets: Positive",TeamBPos,"Neutral",TeamBNeut,"Negitive",TeamBNeg)
  
-  print((pos/tweetCount) *100,"% of people tweeted postivly")
-  print((neg/tweetCount) *100,"% of people tweeted negitivly")
-  print((neut/tweetCount) *100,"% of people tweeted Neutral")
-  print("out of ",tweetCount)
-  total = (pos - neg / pos + neg + neut)
-  totalA = (TeamApos - TeamAneg / TeamApos + TeamAneg + TeamAneut)
-  totalB = (TeamBpos - TeamBneg / TeamBpos + TeamBneg + TeamBneut)
-  print( TeamA[1] ,"tweets: Positive",TeamAPos,"Neutral",TeamANeut,"Negitive",TeamANeg)
-  print( TeamB[1] ,"tweets: Positive",TeamBPos,"Neutral",TeamBNeut,"Negitive",TeamBNeg)
- 
- except ZeroDivisionError:
-  total = float('Inf')
-  totalA = float('Inf')
-  totalB = float('Inf')
-  print( TeamA[1] ,"tweets: Positive",TeamAPos,"Neutral",TeamANeut,"Negitive",TeamANeg)
-  print( TeamB[1] ,"tweets: Positive",TeamBPos,"Neutral",TeamBNeut,"Negitive",TeamBNeg)
+  except ZeroDivisionError:
+   total = float('Inf')
+   totalA = float('Inf')
+   totalB = float('Inf')
+   print( TeamA[1] ,"tweets: Positive",TeamAPos,"Neutral",TeamANeut,"Negitive",TeamANeg)
+   print( TeamB[1] ,"tweets: Positive",TeamBPos,"Neutral",TeamBNeut,"Negitive",TeamBNeg)
     
-def plotting():
- plt.plot([totalA,totalB])
- plt.ylabel('Level of Sentiment')
- plt.xlabel('Minutes in the game')
- plt.show()
+ def plotting():
+  plt.plot([totalA,totalB])
+  plt.ylabel('Level of Sentiment')
+  plt.xlabel('Minutes in the game')
+  plt.show()
  
-def eventTime(tweetObject):
- events = {}
- incEvents = {}
- incEvents['goal'] = [int()]
- incEvents['redCard'] = [int()]
- incEvents['penalty'] = [int()]
- incEvents['substitution'] = [int()]
- incEvents['injury'] = [int()]
- incEvents['freeKick'] = [int()]
- incEvents['offside'] = [int()]
- incEvents['assist'] = [int()]
- incEvents['yellowcard'] = [int()]
+ def eventTime(tweetObject):
+  events = {}
+  incEvents = {}
+  incEvents['goal'] = [int()]
+  incEvents['redCard'] = [int()]
+  incEvents['penalty'] = [int()]
+  incEvents['substitution'] = [int()]
+  incEvents['injury'] = [int()]
+  incEvents['freeKick'] = [int()]
+  incEvents['offside'] = [int()]
+  incEvents['assist'] = [int()]
+  incEvents['yellowcard'] = [int()]
 
- events['goal'] = ["goal", "score", "point", "shot", "strike", "kick", "on target"]
- events['redCard'] = ["red card", "sent off", "foul", "sending off", "straight red"]
- events['penalty'] = ["penalty", "pen"]
- events['substitution'] = ["substitution", "sub", "injury", "subbed", "bench"]
- events['injury'] = ["injured", "injury"]
- events['freeKick'] = ["free-kick", "sub", "injury", "subbed", "bench"]
- events['offside'] = ["offside"]
- events['assist'] = ["assist", "pass", "knocked on"]
- events['yellowcard'] = ["yellow", "foul", "warning", "caution"]
+  events['goal'] = ["goal", "score", "point", "shot", "strike", "kick", "on target"]
+  events['redCard'] = ["red card", "sent off", "foul", "sending off", "straight red"]
+  events['penalty'] = ["penalty", "pen"]
+  events['substitution'] = ["substitution", "sub", "injury", "subbed", "bench"]
+  events['injury'] = ["injured", "injury"]
+  events['freeKick'] = ["free-kick", "sub", "injury", "subbed", "bench"]
+  events['offside'] = ["offside"]
+  events['assist'] = ["assist", "pass", "knocked on"]
+  events['yellowcard'] = ["yellow", "foul", "warning", "caution"]
 
- for event in events:
-  tweet = tweetObject['new_tweet']
-  if re.search(event, tweet, re.IGNORECASE):
-   incEvents['event'] = +1 
+  for event in events:
+   tweet = tweetObject['new_tweet']
+   if re.search(event, tweet, re.IGNORECASE):
+    incEvents['event'] = +1 
 
     #if count in incEvents if it is exceeded average by 400%
           
