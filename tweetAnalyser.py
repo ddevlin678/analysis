@@ -30,6 +30,7 @@ atoken=""
 asecret=""
 fullTweets = []
 cleanTweets = []
+
 #tweetObject = []
 
 class listener(StreamListener):
@@ -46,20 +47,26 @@ class listener(StreamListener):
    favorite_count = all_data['favorite_count']
 
    newTweet = (tweet_text.encode('ascii', 'ignore')).decode("utf-8")
-   newTweet = np.vectorize(remove_pattern)(newTweet, "RT @[\w]*:")
-   newTweet = np.vectorize(remove_pattern)(newTweet, "@[\w]*")
-   newTweet = np.vectorize(remove_pattern)(newTweet, "https?://[A-Za-z0-9./]*")
-   newTweet = np.core.defchararray.replace(newTweet, "[^a-zA-Z#]", " ")
+   newTweet = re.sub('RT @[\w]*:',  '',    newTweet)
+   newTweet = re.sub('@[\w]*',  '',    newTweet)
+   newTweet = re.sub('https?://[A-Za-z0-9./]*',  '',    newTweet)
+
+   
+   #print(newTweet)
+   #newTweet = np.vectorize(remove_pattern)(newTweet, "RT @[\w]*:")
+   #newTweet = np.vectorize(remove_pattern)(newTweet, "@[\w]*")
+   #newTweet = np.vectorize(remove_pattern)(newTweet, "https?://[A-Za-z0-9./]*")
+   #newTweet = np.core.defchararray.replace(newTweet, "[^a-zA-Z#]", " ")
 
    if all_data['truncated'] == True:
     extended_tweet = all_data['extended_tweet']
     tweet_text = extended_tweet['full_text']
     #newTweet = tweet_text.encode('utf-8')
     newTweet = (tweet_text.encode('ascii', 'ignore')).decode("utf-8")
-    newTweet = np.vectorize(remove_pattern)(newTweet, "RT @[\w]*:")
-    newTweet = np.vectorize(remove_pattern)(newTweet, "@[\w]*")
-    newTweet = np.vectorize(remove_pattern)(newTweet, "https?://[A-Za-z0-9./]*")
-    newTweet = np.core.defchararray.replace(newTweet, "[^a-zA-Z#]", " ")
+    newTweet = re.sub('RT @[\w]*:',  '',    newTweet)
+    newTweet = re.sub('@[\w]*',  '',    newTweet)
+    newTweet = re.sub('https?://[A-Za-z0-9./]*',  '',    newTweet)
+    #newTweet = np.core.defchararray.replace(newTweet, "[^a-zA-Z#]", " ")
        
 
    if all_data['coordinates'] == True:
@@ -68,10 +75,10 @@ class listener(StreamListener):
     
    else: 
     tweetObject = {"user_id" : user_id, "new_tweet" : newTweet, "f_count" : f_count, "retweet_count" : retweet_count, "favorite_count" : favorite_count, "location" : ''}
-   print(tweetObject)
-   print(tweetObject['new_tweet'])
 
-   #cleanTweet(tweetObject)
+   #print(tweetObject['new_tweet'])
+
+   sent(tweetObject)
 
    #threading.Timer(60.0, cleanTweet(tweetObject)).start()
    #print(tweetObject.keys())
@@ -152,6 +159,8 @@ def text(tweetObject):
  print(analysis.sentiment) 
 #giving a sentiment value to each tweet text
 def sent(tweetObject):
+ 
+ print("HELLO")
  rate = (len(tweetObject))
  pos = int() 
  neg = int()
@@ -166,6 +175,7 @@ def sent(tweetObject):
  TeamBNeg = int()
  #for tweet in tweetObject:
  tweet = tweetObject['new_tweet']
+ print(tweet)
  tweet = ''.join(str(tweet))
       #text(item)
       #naive(item)
@@ -214,17 +224,28 @@ def sent(tweetObject):
        TeamBNeg = TeamBNeg + 1
        if TeamANeg == 0 and TeamBNeg == 0:
         neg = neg + 1
+ print("GE")
+ tweetCount = tweetCount + 1 
+ 
+ try:
+ 
+  print((pos/tweetCount) *100,"% of people tweeted postivly")
+  print((neg/tweetCount) *100,"% of people tweeted negitivly")
+  print((neut/tweetCount) *100,"% of people tweeted Neutral")
+  print("out of ",tweetCount)
+  total = (pos - neg / pos + neg + neut)
+  totalA = (TeamApos - TeamAneg / TeamApos + TeamAneg + TeamAneut)
+  totalB = (TeamBpos - TeamBneg / TeamBpos + TeamBneg + TeamBneut)
+  print( TeamA[1] ,"tweets: Positive",TeamAPos,"Neutral",TeamANeut,"Negitive",TeamANeg)
+  print( TeamB[1] ,"tweets: Positive",TeamBPos,"Neutral",TeamBNeut,"Negitive",TeamBNeg)
+ 
+ except ZeroDivisionError:
+  total = float('Inf')
+  totalA = float('Inf')
+  totalB = float('Inf')
+  print( TeamA[1] ,"tweets: Positive",TeamAPos,"Neutral",TeamANeut,"Negitive",TeamANeg)
+  print( TeamB[1] ,"tweets: Positive",TeamBPos,"Neutral",TeamBNeut,"Negitive",TeamBNeg)
     
- print((pos/rate) *100,"% of people tweeted postivly")
- print((neg/rate) *100,"% of people tweeted negitivly")
- print((neut/rate) *100,"% of people tweeted Neutral")
- print("out of ",rate)
- total = (pos - neg / pos + neg + neut)
- totalA = (TeamApos - TeamAneg / TeamApos + TeamAneg + TeamAneut)
- totalB = (TeamBpos - TeamBneg / TeamBpos + TeamBneg + TeamBneut)
- print( TeamA[1] ,"tweets: Positive",TeamAPos,"Neutral",TeamANeut,"Negitive",TeamANeg)
- print( TeamB[1] ,"tweets: Positive",TeamBPos,"Neutral",TeamBNeut,"Negitive",TeamBNeg)
-
 def plotting():
  plt.plot([totalA,totalB])
  plt.ylabel('Level of Sentiment')
@@ -265,6 +286,9 @@ auth = OAuthHandler(ckey, csecret)
 auth.set_access_token(atoken, asecret)
 twitterStream = Stream(auth, listener(), tweet_mode= 'extended')
 twitterStream.filter(track=["#ARSMUN"])
+
+
+
 
 
 
