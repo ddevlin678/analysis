@@ -25,7 +25,6 @@ import nltk
 import random
 from nltk.corpus import movie_reviews
 
-
 #consumer key, consumer secret, access token, access secret.
 ckey=""
 csecret=""
@@ -34,6 +33,7 @@ asecret=""
 fullTweets = []
 cleanTweets = []
 tweetCount = 0
+
 
 PremierLeague = {}
 PremierLeague['Arsenal'] = ["Arsenal", "The Gunners", "ARS"]
@@ -62,8 +62,7 @@ PremierLeague['West Ham United'] = ["West Ham United", "West Ham",  "The Hammers
 
 class listener(StreamListener):
 #obtaining full tweet object, parsing and creating dictionary to sort are per tweet 
- def sent(tweetObject):
-  print("HELLO")
+ def sent(self, tweetObject):
   pos = int() 
   neg = int()
   neut = int()
@@ -123,6 +122,7 @@ class listener(StreamListener):
         TeamBNeg = TeamBNeg + 1
         if TeamANeg == 0 and TeamBNeg == 0:
          neg = neg + 1
+  global tweetCount 
   tweetCount = tweetCount + 1 
  
   try:
@@ -133,10 +133,11 @@ class listener(StreamListener):
    total = (pos - neg / pos + neg + neut)
    totalA = (TeamApos - TeamAneg / TeamApos + TeamAneg + TeamAneut)
    totalB = (TeamBpos - TeamBneg / TeamBpos + TeamBneg + TeamBneut)
-   print( TeamA[1] ,"tweets: Positive",TeamAPos,"Neutral",TeamANeut,"Negitive",TeamANeg)
-   print( TeamB[1] ,"tweets: Positive",TeamBPos,"Neutral",TeamBNeut,"Negitive",TeamBNeg)
+   print( TeamA[0] ,"tweets: Positive",TeamAPos,"Neutral",TeamANeut,"Negitive",TeamANeg)
+   print( TeamB[0] ,"tweets: Positive",TeamBPos,"Neutral",TeamBNeut,"Negitive",TeamBNeg)
  
   except ZeroDivisionError:
+   print("eg")
    total = float('Inf')
    totalA = float('Inf')
    totalB = float('Inf')
@@ -178,8 +179,7 @@ class listener(StreamListener):
   else: 
    tweetObject = {"user_id" : user_id, "new_tweet" : newTweet, "f_count" : f_count, "retweet_count" : retweet_count, "favorite_count" : favorite_count, "location" : ''}
     
-  print("hello")
-  sent(tweetObject)
+  self.sent(tweetObject)
     
 
    #threading.Timer(60.0, cleanTweet(tweetObject)).start()
@@ -193,7 +193,7 @@ class listener(StreamListener):
  def on_error(self, status):
   print(status)
 
- def text(tweetObject):
+ def text(self, tweetObject):
   analysis = TextBlob(tweetObject)
   print(analysis.sentiment) 
 
@@ -238,10 +238,6 @@ auth = OAuthHandler(ckey, csecret)
 auth.set_access_token(atoken, asecret)
 twitterStream = Stream(auth, listener(), tweet_mode= 'extended')
 twitterStream.filter(track=["#ARSMUN"])
-
-
-
-
 
 
 
