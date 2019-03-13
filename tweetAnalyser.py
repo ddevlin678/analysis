@@ -25,6 +25,7 @@ import nltk
 import random
 from nltk.corpus import movie_reviews
 import traceback
+from nltk.tokenize import word_tokenize
 #consumer key, consumer secret, access token, access secret.
 ckey=""
 csecret=""
@@ -33,10 +34,20 @@ asecret=""
 fullTweets = []
 cleanTweets = []
 tweetCount = 0
-
+TeamAPos = int()
+TeamBPos = int()
+TeamANeut = int()
+TeamBNeut = int()
+TeamANeg = int()
+TeamBNeg = int()
+totalA = 0 
+totalB = 0
+pos = int() 
+neg = int()
+neut = int()
 
 PremierLeague = {}
-PremierLeague['Arsenal'] = ["Arsenal", "The Gunners", "ARS"]
+PremierLeague['Arsenal'] = ["Arsenal", "The Gunners", "ARS", "Gunners"]
 PremierLeague['Aston Villa'] = [ "Aston Villa", "The Villains", "Villa", "AST"]
 PremierLeague['Burnley'] = [ "The Clarets", "Burnley"]
 PremierLeague['Chelsea'] = ["Chelsea", "The Blues", "The Pensioners", "CHE"]
@@ -57,23 +68,106 @@ PremierLeague['Tottenham Hotspur'] = ["Tottenham Hotspur", "Tottenham", "The Spu
 PremierLeague['Watford'] = ["Watford", "Hornets", "Yellow Army", "WFC"]
 PremierLeague['West Bromwich Albion'] = ["West Bromwich" "Albion", "West Bromwich", "The Baggies", "WBA"]
 PremierLeague['West Ham United'] = ["West Ham United", "West Ham",  "The Hammers", "WHU"]
+PremierLeague['FC Schalke 04'] = ["FC Schalke 04", "Schalke", "The Royal Blues", "S04"]
 
 
 
 class listener(StreamListener):
 #obtaining full tweet object, parsing and creating dictionary to sort are per tweet 
+ def inTweetAPos(self, TeamA, tweetObject):
+  tweet = tweetObject['new_tweet']
+  posWordsTeamA = {}
+  for teamNames in TeamA:
+   string_you_are_searching_for = r"\b" + teamNames + r"\b"
+   if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
+    global TeamAPos
+    TeamAPos = TeamAPos + 1
+    #posWordsTeamA.append(word_tokenize(tweet))
+    wordCloudPosA = nltk.FreqDist(word_tokenize(tweet)) 
+    return(True)
+ 
+ def inTweetBPos(self, TeamB, tweetObject):
+  tweet = tweetObject['new_tweet']
+  posWordsTeamB = []
+  for teamNames in TeamB:
+   string_you_are_searching_for = r"\b" + teamNames + r"\b"
+   if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
+    global TeamBPos
+    TeamBPos = TeamBPos + 1
+    posWordsTeamB.append(word_tokenize(tweet))
+    wordCloudPosB = nltk.FreqDist(word_tokenize(tweet)) 
+    return(True)
+
+ def inTweetANeut(self, TeamA, tweetObject):
+  tweet = tweetObject['new_tweet']
+  for teamNames in TeamA:
+   string_you_are_searching_for = r"\b" + teamNames + r"\b"
+   if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
+    global TeamANeut
+    TeamANeut = TeamANeut + 1
+    #neutWordsTeamA.append(word_tokenize(tweet))
+    return(True)
+ 
+ def inTweetBNeut(self, TeamB, tweetObject):
+  tweet = tweetObject['new_tweet']
+  for teamNames in TeamB:
+   string_you_are_searching_for = r"\b" + teamNames + r"\b"
+   if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
+    global TeamBNeut
+    TeamBNeut = TeamBNeut + 1
+    #neutWordsTeamB.append(word_tokenize(tweet)) dont feel its worth mentioning
+    return(True)
+
+ def inTweetANeg(self,TeamA, tweetObject):
+  tweet = tweetObject['new_tweet']
+  for teamNames in TeamA:
+   string_you_are_searching_for = r"\b" + teamNames + r"\b"
+   if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
+    global TeamANeg
+    TeamANeg = TeamANeg + 1
+    wordCloud = nltk.FreqDist(negWordsTeamA) 
+    return(True)
+ 
+ def inTweetBNeg(self, TeamB, tweetObject):
+  tweet = tweetObject['new_tweet']
+  for teamNames in TeamB:
+   string_you_are_searching_for = r"\b" + teamNames + r"\b"
+   if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
+    global TeamBNeg
+    TeamBNeg = TeamBNeg + 1
+    negWordsTeamB.append(word_tokenize(tweet))
+    wordCloud = nltk.FreqDist(negWordsTeamB)
+    return(True)
+
+ def word_cloud(wordCloud):
+  stopwords = set(STOPWORDS)
+  all_words = ' '.join([text for text in wordCloud])
+  wordcloud = Word_Cloud(
+   background_color='white',
+   stopwords=stopwords,
+   width=1600,
+   height=800,
+   random_state=21,
+   colormap='jet',
+   max_words=50,
+   max_font_size=200).generate(all_words)
+  plt.figure(figsize=(12, 10))
+  plt.axis('off')
+  plt.imshow(wordcloud, interpolation="bilinear");
+
+
  def sent(self, tweetObject):
-  pos = int() 
-  neg = int()
-  neut = int()
-  TeamA = PremierLeague['Arsenal']
-  TeamB = PremierLeague['Manchester United']
-  TeamAPos = int()
-  TeamBPos = int()
-  TeamANeut = int()
-  TeamBNeut = int()
-  TeamANeg = int()
-  TeamBNeg = int()
+  #pos = int() 
+  #neg = int()
+  #neut = int()
+  TeamA = PremierLeague['FC Schalke 04']
+  TeamB = PremierLeague['Manchester City']
+  #TeamAPos = int()
+  #TeamBPos = int()
+  #TeamANeut = int()
+  #TeamBNeut = int()
+  #TeamANeg = int()
+  #TeamBNeg = int()
   tweet = tweetObject['new_tweet']
   tweet = ''.join(str(tweet))
 
@@ -81,66 +175,55 @@ class listener(StreamListener):
   lb = score['compound']
   if lb >= 0.05:
    print("Positive")
-   for teamNames in TeamA:
-    string_you_are_searching_for = r"\b" + teamNames + r"\b"
-    if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-     TeamAPos = TeamAPos + 1
-              
-    if TeamAPos == 0:
-     for teamNames in TeamB:
-       string_you_are_searching_for = r"\b" + teamNames + r"\b"
-       if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-        TeamBPos = TeamBPos + 1
-        if TeamAPos == 0 and TeamBPos == 0:
-         pos = pos + 1
+   self.inTweetAPos(TeamA, tweetObject)
+   self.inTweetBPos(TeamB, tweetObject)
+  
+   
+   global pos 
+   pos = pos + 1
 
   elif (lb > -0.05) and (lb < 0.05):
    print("Neutral")
-   for teamNames in TeamA:
-    string_you_are_searching_for = r"\b" + teamNames + r"\b"
-    if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-     TeamANeut = TeamANeut + 1
-              
-   if TeamANeut == 0:
-    for teamNames in TeamB:
-     string_you_are_searching_for = r"\b" + teamNames + r"\b"
-     if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-      TeamBNuet = TeamBNeut + 1
-      if TeamANeut == 0 and TeamBNeut == 0:
-       neut = neut + 1 
-    else:
-     print("Negitive")
-     for teamNames in TeamA:
-      string_you_are_searching_for = r"\b" + teamNames + r"\b"
-      if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-       TeamANeg = TeamANeg + 1
-              
-     if TeamANeg == 0:
-      for teamNames in TeamB:
-       string_you_are_searching_for = r"\b" + teamNames + r"\b"
-       if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
-        TeamBNeg = TeamBNeg + 1
-        if TeamANeg == 0 and TeamBNeg == 0:
-         neg = neg + 1
+   self.inTweetANeut(TeamA, tweetObject)
+   self.inTweetBNeut(TeamB, tweetObject)
+   global neut
+   neut = neut + 1
+    
+  else:
+   print("Negitive")
+   self.inTweetANeg(TeamA, tweetObject)
+   self.inTweetBNeg(TeamB, tweetObject)
+   global neg
+   neg = neg + 1
   global tweetCount 
   tweetCount = tweetCount + 1 
  
-  #try:
-  print(((pos + TeamAPos + TeamBPos) /(tweetCount)) *100,"% of people tweeted postivly")
-  print(((neg + TeamANeg + TeamBNeg)/(tweetCount)) *100,"% of people tweeted negitivly")
-  print(((neut + TeamANeut + TeamBNeut)/(tweetCount)) *100,"% of people tweeted Neutral")
-  print("out of ",tweetCount)
+  try:
+   print("pos",pos,"neg",neg,"neut",neut,"TeamAPos", TeamAPos,"TeamBPos", TeamBPos)
+   print("TeamANeut",TeamANeut,"TeamBNeut",TeamBNeut,"TeamANeg",TeamANeg,"TeamBNeg",TeamBNeg)
+
+   #print(((pos + TeamAPos + TeamBPos) /(tweetCount)) *100,"% of people tweeted postivly")
+   #print(((neg + TeamANeg + TeamBNeg)/(tweetCount)) *100,"% of people tweeted negitivly")
+   #print(((neut + TeamANeut + TeamBNeut)/(tweetCount)) *100,"% of people tweeted Neutral")
+   #print("out of ",tweetCount)
   #total = (pos - neg / pos + neg + neut)
-  totalACount = (TeamAPos + TeamANeut + TeamANeg)
-  totalBCount = (TeamBPos + TeamBNeut + TeamBNeg)
-  totalA = ((TeamAPos - TeamANeg) / (TeamAPos + TeamANeg + TeamANeut))
-  totalB = ((TeamBPos - TeamBNeg) / (TeamBPos + TeamBNeg + TeamBNeut))
-  print( TeamA[0] ,"tweets: Positive",TeamAPos,"Neutral",TeamANeut,"Negitive",TeamANeg)
-  print( TeamB[0] ,"tweets: Positive",TeamBPos,"Neutral",TeamBNeut,"Negitive",TeamBNeg)
-  print(totalA)
-  print(totalB)
-  
-  traceback.print_exc()
+   totalACount = (TeamAPos + TeamANeut + TeamANeg)
+   totalBCount = (TeamBPos + TeamBNeut + TeamBNeg)
+ 
+   global totalA 
+   global totalB
+   #totalA = ((pos - neg) / (pos + neg + neut))
+   totalA = ((TeamAPos - TeamANeg) / (TeamAPos + TeamANeg + TeamANeut))
+   totalB = ((TeamBPos - TeamBNeg) / (TeamBPos + TeamBNeg + TeamBNeut))
+   #print( TeamA[0] ,"tweets: Positive",TeamAPos,"Neutral",TeamANeut,"Negitive",TeamANeg)
+   #print( TeamB[0] ,"tweets: Positive",TeamBPos,"Neutral",TeamBNeut,"Negitive",TeamBNeg)
+   #print(totalA)
+   #print(totalB)
+  except ZeroDivisionError:
+   print("Error")
+
+
+  #traceback.print_exc()
 
  def on_data(self, data):
   #try:
@@ -149,6 +232,7 @@ class listener(StreamListener):
   tweet_text = all_data['text']
   user_id = all_data['id']
   user = all_data['user']
+  time = all_data['created_at']
   f_count = user['followers_count']
   retweet_count = all_data['retweet_count']
   favorite_count = all_data['favorite_count']
@@ -200,7 +284,12 @@ class listener(StreamListener):
   plt.ylabel('Level of Sentiment')
   plt.xlabel('Minutes in the game')
   plt.show()
+
+  #for word.value in wordCloud: #cause its a dictionary
+   # if eventWord in events:
+
  
+
  def eventTime(tweetObject):
   events = {}
   incEvents = {}
@@ -234,7 +323,4 @@ class listener(StreamListener):
 auth = OAuthHandler(ckey, csecret)
 auth.set_access_token(atoken, asecret)
 twitterStream = Stream(auth, listener(), tweet_mode= 'extended')
-twitterStream.filter(track=["#ARSMUN"])
-
-
-
+twitterStream.filter(track=["#UCL"])
