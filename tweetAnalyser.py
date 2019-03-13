@@ -16,9 +16,9 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 analyser = SentimentIntensityAnalyzer()
 #import TextBlob
 from collections import defaultdict
-from textblob import TextBlob, Word, Blobber
-from textblob.classifiers import NaiveBayesClassifier
-from textblob.taggers import NLTKTagger
+from text.blob import TextBlob, Word, Blobber
+from text.classifiers import NaiveBayesClassifier
+from text.taggers import NLTKTagger
 import threading
 import matplotlib.pyplot as plt
 import nltk
@@ -69,6 +69,9 @@ PremierLeague['Watford'] = ["Watford", "Hornets", "Yellow Army", "WFC"]
 PremierLeague['West Bromwich Albion'] = ["West Bromwich" "Albion", "West Bromwich", "The Baggies", "WBA"]
 PremierLeague['West Ham United'] = ["West Ham United", "West Ham",  "The Hammers", "WHU"]
 PremierLeague['FC Schalke 04'] = ["FC Schalke 04", "Schalke", "The Royal Blues", "S04"]
+PremierLeague['Atletico Madrid'] = ["Atletico Madrid", "ATM"]
+PremierLeague['Juventus'] = ["Juventus", "JUVE" ,"JUV"]
+
 
 
 
@@ -76,7 +79,7 @@ class listener(StreamListener):
 #obtaining full tweet object, parsing and creating dictionary to sort are per tweet 
  def inTweetAPos(self, TeamA, tweetObject):
   tweet = tweetObject['new_tweet']
-  posWordsTeamA = {}
+  posWordsTeamA = []
   for teamNames in TeamA:
    string_you_are_searching_for = r"\b" + teamNames + r"\b"
    if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
@@ -84,11 +87,15 @@ class listener(StreamListener):
     TeamAPos = TeamAPos + 1
     #posWordsTeamA.append(word_tokenize(tweet))
     wordCloudPosA = nltk.FreqDist(word_tokenize(tweet)) 
+    ht = re.findall(r"#(\w+)", tweet)
+    hashtag.append(ht)
+    possibleTags = nltk.FreqDist(hashtag)
     return(True)
  
  def inTweetBPos(self, TeamB, tweetObject):
   tweet = tweetObject['new_tweet']
   posWordsTeamB = []
+  hashtag = []
   for teamNames in TeamB:
    string_you_are_searching_for = r"\b" + teamNames + r"\b"
    if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
@@ -96,6 +103,9 @@ class listener(StreamListener):
     TeamBPos = TeamBPos + 1
     posWordsTeamB.append(word_tokenize(tweet))
     wordCloudPosB = nltk.FreqDist(word_tokenize(tweet)) 
+    ht = re.findall(r"#(\w+)", tweet)
+    hashtag.append(ht)
+    possibleTags = nltk.FreqDist(hashtag) # beginning of machine learning (if surge in tags by 600% could be a possible tag) 
     return(True)
 
  def inTweetANeut(self, TeamA, tweetObject):
@@ -160,8 +170,8 @@ class listener(StreamListener):
   #pos = int() 
   #neg = int()
   #neut = int()
-  TeamA = PremierLeague['FC Schalke 04']
-  TeamB = PremierLeague['Manchester City']
+  TeamA = PremierLeague['Juventus']
+  TeamB = PremierLeague['Atletico Madrid']
   #TeamAPos = int()
   #TeamBPos = int()
   #TeamANeut = int()
@@ -276,6 +286,7 @@ class listener(StreamListener):
 
  def text(self, tweetObject):
   analysis = TextBlob(tweetObject)
+  print("HELLO")
   print(analysis.sentiment) 
 
  
@@ -323,4 +334,4 @@ class listener(StreamListener):
 auth = OAuthHandler(ckey, csecret)
 auth.set_access_token(atoken, asecret)
 twitterStream = Stream(auth, listener(), tweet_mode= 'extended')
-twitterStream.filter(track=["#UCL"])
+twitterStream.filter(track=["#juvatm"])
