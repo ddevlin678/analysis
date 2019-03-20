@@ -1,4 +1,3 @@
-
 from __future__ import division
 from tweepy import Stream
 from tweepy import OAuthHandler
@@ -15,6 +14,7 @@ import numpy as np
 import re 
 import json
 import unicodedata 
+from matplotlib.animation import FuncAnimation
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 analyser = SentimentIntensityAnalyzer()
 from textblob import TextBlob
@@ -61,8 +61,19 @@ data = []
 start = ('2019-03-17 16:30:00')
 finish = ('2019-03-17 18:30:00')
 fig = plt.figure() 
-ax1 = fig.add_subplot(1,120,1) # need grid y 1(positive sentiment), 0, -1(negitive sentiment) by 120 minutes 
+#ax1 = fig.add_subplot(1,120,1) # need grid y 1(positive sentiment), 0, -1(negitive sentiment) by 120 minutes 
 live = False
+#plt.axis([-1, 1, 0, 120])
+#x = linspace(0,25)
+#y = TeamATotalLive
+#yyaxis left
+#plot(x,y)
+#r = TeamBTotalLive
+#yyaxis left
+#plot(x,r)
+fig, ax = plt.subplots()
+xdata, ydata = [], []
+ln, = plt.plot([], [], 'ro')
 
 
 PremierLeague = {}
@@ -108,7 +119,7 @@ def inTweetAPos(TeamA, tweetObject):
   global TeamAPos
   global wordCloudPosA
   global TeamAPosLive
-  string_you_are_searching_for = str(teamNames)
+  string_you_are_searching_for = r"\b" + str(teamNames) + r"\b"
   if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
    TeamAPos = TeamAPos + 1
    if live == True:
@@ -125,7 +136,7 @@ def inTweetBPos(TeamB, tweetObject):
  global wordCloudPosB
  global TeamBPosLive
  for teamNames in TeamB:
-  string_you_are_searching_for = str(teamNames)
+  string_you_are_searching_for = r"\b" + str(teamNames) + r"\b"
   if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
    TeamBPos = TeamBPos + 1
    if live == True:
@@ -138,7 +149,7 @@ def inTweetBPos(TeamB, tweetObject):
 def inTweetANeut(TeamA, tweetObject):
  tweet = tweetObject#['new_tweet']
  for teamNames in TeamA:
-  string_you_are_searching_for = str(teamNames)
+  string_you_are_searching_for = r"\b" + str(teamNames) + r"\b"
   if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
    global TeamANeut
    global TeamANeutLive
@@ -151,7 +162,7 @@ def inTweetANeut(TeamA, tweetObject):
 def inTweetBNeut(TeamB, tweetObject):
  tweet = tweetObject#['new_tweet']
  for teamNames in TeamB:
-  string_you_are_searching_for = str(teamNames)
+  string_you_are_searching_for = r"\b" + str(teamNames) + r"\b"
   if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
    global TeamBNeut
    global TeamBNeutLive
@@ -168,7 +179,7 @@ def inTweetANeg(TeamA, tweetObject):
  global wordCloudNegA
  global TeamANegLive
  for teamNames in TeamA:
-  string_you_are_searching_for = str(teamNames)
+  string_you_are_searching_for = r"\b" + str(teamNames) + r"\b"
   if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
    TeamANeg = TeamANeg + 1
    if live == True:
@@ -185,7 +196,7 @@ def inTweetBNeg(TeamB, tweetObject):
  global wordCloudNegB
  global TeamBNegLive
  for teamNames in TeamB:
-  string_you_are_searching_for = str(teamNames)
+  string_you_are_searching_for = r"\b" + str(teamNames) + r"\b"
   if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
    TeamBNeg = TeamBNeg + 1
    if live == True:
@@ -195,13 +206,21 @@ def inTweetBNeg(TeamB, tweetObject):
    hashtag.append(ht)
    return(True)
 
-def animate(i):
- xs = TeamATotalLive
- ys = TeamBTotalLive
+#def animate(i):
+# xs = TeamATotalLive
+# ys = TeamBTotalLive
+# plt.axis([-1, 1, 0, 120])
+# x = linspace(0,25)
+# y = TeamATotalLive
+# yyaxis left
+# plot(x,y)
+# r = TeamBTotalLive
+# yyaxis left
+# plot(x,r)
  #xs.append(TeamATotalLive)
  #ys.append(TeamBTotalLive)
- ax1.clear()
- ax1.plot(xs, ys) #both teams average level of sentiment 
+ #ax1.clear()
+ #ax1.plot(xs, ys) #both teams average level of sentiment 
 
 def wordCloud(wordcloud, title = None):
  stopwords = set(STOPWORDS)
@@ -314,7 +333,7 @@ def plotting(totalA, totalB): # havnt got working
  plt.show()
 
 
-def eventTime(tweetObject): # want to increment a count of the occurance of any of the events types
+def eventTime(tweetObject): # want to increment a count of the occurrence of any of the events types
  events = {}
  incEvents = {}
  incEvents['goal'] = [int()]
@@ -344,7 +363,16 @@ def eventTime(tweetObject): # want to increment a count of the occurance of any 
   if re.search(happening, tweet, re.IGNORECASE):
    incEvents[happening] = +1 
   
+def init():
+ ax.set_xlim(0, 120)
+ ax.set_ylim(-1, 1)
+ return ln,
 
+def update(frame):
+ xdata.append(frame)
+ ydata.append(np.sin(frame))
+ ln.set_data(xdata, ydata)
+ return ln,
 
 
  
@@ -353,12 +381,15 @@ with open('eveche2019-03-17.csv', 'r') as csvfile:
  for row in readCSV:
   tweetObject = row[1]
   time1 = row[2]
-  print(time1)
+  location = row[7]
   while start < time1 < finish:
    live = True
    sent(tweetObject)
    text(tweetObject)
-   ani = animation.FuncAnimation(fig, animate, interval=60000)
+   ani = FuncAnimation(fig, update, frames=np.linspace(TeamATotalLive, TeamBTotalLive),
+                    init_func=init, blit=True)
+   plt.show()
+
    #eventTime(tweetObject)  
   sent(tweetObject)
   text(tweetObject)
@@ -374,7 +405,5 @@ with open('eveche2019-03-17.csv', 'r') as csvfile:
  wordcloud.append(nltk.FreqDist(flat_list4).most_common(150))
  wordCloud(wordcloud)
  plt.show() # show graph with teams sentiment over the 120 minutes of live playing/break
-
-
 
 
