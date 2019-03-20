@@ -127,7 +127,7 @@ def inTweetAPos(TeamA, tweetObject):
    wordCloudPosA.append(word_tokenize(str(tweet)))
    ht = re.findall(r"#(\w+)", tweet)
    hashtag.append(ht) 
-   return(True)
+  return(True)
  
 def inTweetBPos(TeamB, tweetObject):
  tweet = tweetObject#['new_tweet']
@@ -144,7 +144,7 @@ def inTweetBPos(TeamB, tweetObject):
    wordCloudPosB.append(word_tokenize(tweet))
    ht = re.findall(r"#(\w+)", tweet)
    hashtag.append(ht)
-   return(True)
+  return(True)
 
 def inTweetANeut(TeamA, tweetObject):
  tweet = tweetObject#['new_tweet']
@@ -157,7 +157,7 @@ def inTweetANeut(TeamA, tweetObject):
    TeamANeut = TeamANeut + 1
    if live == True:
     TeamANeutLive = TeamANeutLive + 1
-   return(True)
+  return(True)
  
 def inTweetBNeut(TeamB, tweetObject):
  tweet = tweetObject#['new_tweet']
@@ -170,7 +170,7 @@ def inTweetBNeut(TeamB, tweetObject):
    TeamBNeut = TeamBNeut + 1
    if live == True:
     TeamBNeutLive = TeamBNeutLive + 1
-   return(True)
+  return(True)
 
 def inTweetANeg(TeamA, tweetObject):
  tweet = tweetObject#['new_tweet']
@@ -183,11 +183,12 @@ def inTweetANeg(TeamA, tweetObject):
   if re.search(string_you_are_searching_for, tweet, re.IGNORECASE):
    TeamANeg = TeamANeg + 1
    if live == True:
-    TeamANegLive = TeamANegLive + 1 
+    TeamANegLive = TeamANegLive + 1
+    print(TeamANegLive) 
    wordCloudNegA.append(word_tokenize(tweet)) 
    ht = re.findall(r"#(\w+)", tweet)
    hashtag.append(ht)
-   return(True)
+  return(True)
  
 def inTweetBNeg(TeamB, tweetObject):
  tweet = tweetObject#['new_tweet']
@@ -201,10 +202,11 @@ def inTweetBNeg(TeamB, tweetObject):
    TeamBNeg = TeamBNeg + 1
    if live == True:
     TeamBNegLive = TeamBNegLive + 1 
+    print(TeamBNegLive)
    wordCloudNegB.append(word_tokenize(tweet)) 
    ht = re.findall(r"#(\w+)", tweet)
    hashtag.append(ht)
-   return(True)
+  return(True)
 
 #def animate(i):
 # xs = TeamATotalLive
@@ -358,10 +360,14 @@ def eventTime(tweetObject): # want to increment a count of the occurrence of any
   
 
  for event in events:
-  tweet = tweetObject#['new_tweet']
-  happening = str(event)
-  if re.search(happening, tweet, re.IGNORECASE):
-   incEvents[happening] = +1 
+  for x in events[event]:
+   #tweet = tweetObject#['new_tweet']
+   #print(x)
+   print(tweetObject)
+   if re.search(x, tweetObject, re.IGNORECASE):
+    incEvents[event] =+1
+  print(incEvents)	
+  return(True)#print(incEvents)
   
 def init():
  ax.set_xlim(0, 120)
@@ -370,11 +376,11 @@ def init():
 
 def update(frame):
  xdata.append(frame)
- ydata.append(np.sin(frame))
+ ydata.append(np(frame))
  ln.set_data(xdata, ydata)
  return ln,
 
-
+#x = time1 + datetime.timedelta(hours=i) for i in range(120)]
  
 with open('eveche2019-03-17.csv', 'r') as csvfile:
  readCSV = csv.reader(csvfile, delimiter=',')
@@ -386,11 +392,12 @@ with open('eveche2019-03-17.csv', 'r') as csvfile:
    live = True
    sent(tweetObject)
    text(tweetObject)
+   #eventTime(tweetObject) 
    ani = FuncAnimation(fig, update, frames=np.linspace(TeamATotalLive, TeamBTotalLive),
                     init_func=init, blit=True)
    plt.show()
 
-   #eventTime(tweetObject)  
+    
   sent(tweetObject)
   text(tweetObject)
  wordcloud = [] 
@@ -405,5 +412,3 @@ with open('eveche2019-03-17.csv', 'r') as csvfile:
  wordcloud.append(nltk.FreqDist(flat_list4).most_common(150))
  wordCloud(wordcloud)
  plt.show() # show graph with teams sentiment over the 120 minutes of live playing/break
-
-
