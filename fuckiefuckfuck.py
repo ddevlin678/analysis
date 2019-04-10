@@ -321,7 +321,8 @@ with open('eveche2019-03-17-rt1.csv', 'r') as csvfile:
    #start = datetime.datetime.strptime(start, '%Y-%m-%d  %H:%M:%S')
    #finish = datetime.datetime.strptime(finish, '%Y-%m-%d  %H:%M:%S')
 
-   
+    halftime = start + 48
+    secondhalf = start + 112
     live = (start < tweetTime) and (tweetTime < finish)
 
    #tweetSentiment refers to score between -1 and 1
