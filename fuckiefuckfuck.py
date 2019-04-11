@@ -19,6 +19,7 @@ from textblob import TextBlob
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib import style
+from datetime import timedelta
 import threading
 
 import nltk
@@ -58,7 +59,7 @@ neg = int()
 neut = int()
 data = []
 start = datetime.datetime(2019, 3, 17, 16, 30, 00)
-finish = datetime.datetime(2019, 3, 17, 18, 30, 00)
+#finish = datetime.datetime(2019, 3, 17, 18, 30, 00)
 plothot = []
 
 PremierLeague = {}
@@ -321,9 +322,11 @@ with open('eveche2019-03-17-rt1.csv', 'r') as csvfile:
    #start = datetime.datetime.strptime(start, '%Y-%m-%d  %H:%M:%S')
    #finish = datetime.datetime.strptime(finish, '%Y-%m-%d  %H:%M:%S')
 
-    halftime = start + 48
-    secondhalf = start + 112
-    live = (start < tweetTime) and (tweetTime < finish)
+    firsthalf = start + timedelta(minutes=48)
+    secondhalf = firsthalf + timedelta(minutes=15)
+    finish = secondhalf + timedelta(minutes=48)
+    #live = (start < tweetTime) and (tweetTime < finish)
+    live = (start <= tweet) and (tweet <= firsthalf) or (secondhalf <= tweet) and (tweet <= finish)
 
    #tweetSentiment refers to score between -1 and 1
     tweetTuple = sentiment(row,live)
@@ -419,10 +422,10 @@ with open('eveche2019-03-17-rt1.csv', 'r') as csvfile:
     #for k: x[k] for k in x if k in y and x[k] < y[k]
      #print("grouped")
  def plotting(myListA,myListB):
-  y1= myListA[:118]
-  y2= myListB[:118]
-  x = [item + 1 for item in range(118)]
-  x2 = [item + 1 for item in range(118)]
+  y1= myListA[]
+  y2= myListB[]
+  x = [item + 1 for item in range(96)]
+  x2 = [item + 1 for item in range(96)]
   plt.xlabel('Sentiment Weight')
   plt.ylabel('Live sentiment')
   plt.plot(x, y1)
@@ -456,7 +459,7 @@ with open('eveche2019-03-17-rt1.csv', 'r') as csvfile:
  eventList2 = []
  for event in events:
   eventList = []
-  for i in range(0,120):#len(listofDict):
+  for i in range(0,96):#len(listofDict):
    eventList.append(listofDict[i][event])
   eventList2.append(eventList)
 
