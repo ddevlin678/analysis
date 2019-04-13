@@ -325,11 +325,9 @@ with open('eveche2019-03-17-rt1.csv', 'r') as csvfile:
 
    #tweetSentiment refers to score between -1 and 1
     tweetTuple = sentiment(row,live)
-
-
     tweetSentiment = (tweetTuple[0])
     teamType = tweetTuple[1]
-    #eventTime(row, live)
+
     
     
 
