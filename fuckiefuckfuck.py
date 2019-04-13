@@ -265,14 +265,9 @@ def eventTime(row): # want to increment a count of the occurrence of any of the 
   
 
 with open('eveche2019-03-17-rt1.csv', 'r') as csvfile:
- 
- 
  readCSV = csv.reader(csvfile, delimiter=',')
-
  for row in readCSV:
   data.append(row)
-  #if 'True' in row:
-   #verified.append(row)
  df = pd.DataFrame(data)
  df = df.set_index(pd.DatetimeIndex(df[2]))
  grouped = df.groupby(df.index.map(lambda t: (t.hour, t.minute)))
