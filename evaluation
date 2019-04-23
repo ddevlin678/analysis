@@ -1,0 +1,15 @@
+dictionary1 = {
+    "TeamA": ["Chelsea", "Blues","Pensioners", "CHE", "CFC"],
+    "TeamB": ["Everton", "Toffees",  "EVE", "EFC"]
+    }
+dictionary2 = {
+    "TeamA": ["Chelsea", "Blues","Pensioners", "CHE", "CFC"],
+    "TeamB": ["Clarets", "Burnley",  "BFC", ""]
+    }
+dictionary3 = {
+    "TeamA": ["ManU", "United","Manchester", "MUFC", ""],
+    "TeamB": ["Everton", "Toffees",  "EVE", "EFC"]
+    }
+dictionary4 = {
+    "TeamA": ["Arsenal", "Gunners","ARS", "", ""],
+    "TeamB": ["Crystal", "Palace",  "Eagles", "CRY"]
