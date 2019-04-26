@@ -15,7 +15,7 @@ with open('eveche2019-test-17-rt1.csv', 'a', newline='') as output:
                            lang = "en",
                            tweet_mode = "extended",
                            since = "2019-03-17",
-                           until = "2019-03-18").items(1000):
+                           until = "2019-03-18").items():
 
   
   tweet_text = all_data.full_text
