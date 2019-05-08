@@ -3,9 +3,10 @@
 To Run visualisation and analysis please open Jupyter notebook inside command prompt/terminal using command 'jupyter notebook' installation instructions are located on reference 14 inside report. 
 
 Upload sentimentanalysis.py and relevant CSV for anaylsis
-uncomment/add relevant CSV inside sentimentanalysis.py #line number 
-uncomment/add relevant kickoff time #line number 
-uncomment/add relevant dictionary of teams alias' #line number 
+uncomment/add relevant CSV inside sentimentanalysis.py #line number 223-226 
+uncomment/add relevant kickoff time #line number 53-56 
+uncomment/add relevant dictionary of teams alias' #line number 96-111
+uncomment/add relevant team names to time event graph #line number 326-327
 Run system and wait for visualisation. 
 
 If you wish to run on your own dataset, 
